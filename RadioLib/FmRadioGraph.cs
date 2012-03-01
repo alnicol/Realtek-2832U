@@ -1,38 +1,51 @@
 using System;
 using System.Runtime.InteropServices;
 using DirectShowLib;
+using DirectShowLib.Utils;
 
 namespace RadioLib
 {
     public class FmRadioGraph : RadioBase, IDisposable
     {
-        public FmRadioGraph()
+        protected override bool BuildGraph()
         {
-            CreateFilterGraph();
-        }
+            renderer = FilterGraphTools.AddFilterFromClsid(filterGraph, typeof(DSoundRender).GUID, "Renderer");
 
-        private void CreateFilterGraph()
-        {
-            var filterGraph = (IFilterGraph2) new FilterGraph();
-            var device = FindDeviceByName("RTKFMSourceFilter");
-
-            capFilter = CreateFilterInstance(device);
-            var hr = filterGraph.AddFilter(capFilter, "RTKFMSourceFilter");
-            Marshal.ThrowExceptionForHR(hr);
-
-            outputPin = GetUnconnectedPin(capFilter, PinDirection.Output);
-            if (outputPin == null)
+            sourceOutputPin = GetUnconnectedPin(source, PinDirection.Output);
+            if (sourceOutputPin == null)
                 throw new NullReferenceException("Cannot find unconnected output pin");
 
-            hr = filterGraph.Render(outputPin);
-            Marshal.ThrowExceptionForHR(hr);
+            renderInputPin = GetUnconnectedPin(renderer, PinDirection.Input);
+            if (renderInputPin == null)
+                throw new NullReferenceException("Cannot find unconnected input pin");
 
-            mediaControl = filterGraph as IMediaControl;
+            graphBuilt = true;
+            return true;
         }
 
         public FmRadio RadioControl
         {
-            get { return new FmRadio((IFmRadioControlFilter)capFilter); }
+            get { return new FmRadio((IFmRadioControlFilter)source); }
         }
+
+        protected override void ConnectPins()
+        {
+            FilterGraphTools.ConnectFilters(filterGraph, sourceOutputPin, renderInputPin, true);
+        }
+
+        protected override string SourceFilterName
+        {
+            get { return "RTKFMSourceFilter"; }
+        }
+
+        protected override void DisconnectPins()
+        {
+            var hr = filterGraph.Disconnect(sourceOutputPin);
+            Marshal.ThrowExceptionForHR(hr);
+
+            hr = filterGraph.Disconnect(renderInputPin);
+            Marshal.ThrowExceptionForHR(hr);
+        }
+
     }
 }

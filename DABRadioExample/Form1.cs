@@ -16,10 +16,9 @@ namespace DABRadioExample
     public partial class Form1 : Form
     {
         private readonly ChannelData channelData;
-        private DabRadio controller;
-        private DabRadioGraph dabRadioGraph;
+        private readonly DabRadio controller;
+        private readonly DabRadioGraph dabRadioGraph;
         private ServiceDetails currentService;
-        private bool isGraphBuilt;
 
         public Form1()
         {
@@ -53,8 +52,11 @@ namespace DABRadioExample
             controller.Add(service);
             currentService = service;
             Thread.Sleep(800);
-            BuildGraph();
-            dabRadioGraph.Start();
+            
+            var result = controller.QueryConnect();
+            if (result != FmResult.Ok)
+                return;
+            dabRadioGraph.Play();
         }
 
         void bandDropDown_SelectedIndexChanged(object sender, EventArgs e)
@@ -104,23 +106,13 @@ namespace DABRadioExample
             ParseFic();
         }
 
-        private void BuildGraph()
+        private void playButton_Click(object sender, EventArgs e)
         {
             var result = controller.QueryConnect();
             if (result != FmResult.Ok)
                 return;
-            
-            if (isGraphBuilt)
-                dabRadioGraph.ReConnectFilters();
-            else
-                dabRadioGraph.ConnectFilters();
-            isGraphBuilt = true;
-        }
 
-        private void playButton_Click(object sender, EventArgs e)
-        {
-            BuildGraph();
-            dabRadioGraph.Start();
+            dabRadioGraph.Play();
         }
 
         private void stopButton_Click(object sender, EventArgs e)

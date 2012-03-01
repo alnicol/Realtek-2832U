@@ -5,12 +5,50 @@ using DirectShowLib;
 
 namespace RadioLib
 {
-    public class RadioBase
+    public abstract class RadioBase
     {
-        protected IMediaControl mediaControl;
-        private bool disposed;
-        protected IBaseFilter capFilter;
-        protected IPin outputPin;
+        protected bool disposed;
+
+        protected IFilterGraph2 filterGraph;
+        protected IBaseFilter source;
+        protected IBaseFilter renderer;
+        protected IPin sourceOutputPin;
+        protected IPin renderInputPin;
+        protected bool graphBuilt;
+        protected bool graphRunning;
+        protected bool pinsConnected;
+
+        protected abstract string SourceFilterName { get; }
+        protected abstract void DisconnectPins();
+        protected abstract void ConnectPins();
+        protected abstract bool BuildGraph();
+
+        protected RadioBase()
+        {
+            filterGraph = (IFilterGraph2)new FilterGraph();
+            AddSourceFilter();
+        }
+
+        protected IMediaControl MediaControl
+        {
+            get { return filterGraph as IMediaControl; }
+        }
+
+        protected bool AddSourceFilter()
+        {
+            if (filterGraph == null)
+                return false;
+
+            var device = FindDeviceByName(SourceFilterName);
+            if (device == null)
+                throw new NullReferenceException("Unable to find source filter");
+
+            source = CreateFilterInstance(device);
+            var hr = filterGraph.AddFilter(source, SourceFilterName);
+            Marshal.ThrowExceptionForHR(hr);
+
+            return true;
+        }
 
         protected DsDevice FindDeviceByName(string name)
         {
@@ -65,22 +103,57 @@ namespace RadioLib
             return destPin;
         }
 
-        public void Start()
+        public bool Play()
         {
-            var hr = mediaControl.Run();
+            if (!graphBuilt)
+            {
+                var result = BuildGraph();
+                if (!result)
+                    return false;
+            }
+
+            if (!pinsConnected)
+            {
+                ConnectPins();
+                pinsConnected = true;
+            }
+
+            var hr = MediaControl.Run();
             Marshal.ThrowExceptionForHR(hr);
+            graphRunning = true;
+            return true;
         }
 
-        public void Stop()
+        private bool Pause()
         {
-            var hr = mediaControl.Stop();
+            if (!graphBuilt)
+                return false;
+
+            if (!graphRunning)
+                return true;
+
+            var hr = MediaControl.Pause();
             Marshal.ThrowExceptionForHR(hr);
+            return true;
         }
 
-        public void Pause()
+        public bool Stop()
         {
-            var hr = mediaControl.Pause();
+            if (!graphBuilt)
+                return false;
+
+            if (!graphRunning)
+                return true;
+
+            var hr = MediaControl.Stop();
             Marshal.ThrowExceptionForHR(hr);
+            graphRunning = false;
+
+            if (pinsConnected)
+                DisconnectPins();
+
+            pinsConnected = false;
+            return true;
         }
 
         public void Dispose()
@@ -99,23 +172,35 @@ namespace RadioLib
                 // Dispose managed resources.
             }
 
-            if (mediaControl != null)
+            if (filterGraph != null)
             {
-                mediaControl.Stop();
-                Marshal.ReleaseComObject(mediaControl);
-                mediaControl = null;
+                MediaControl.Stop();
+                Marshal.ReleaseComObject(filterGraph);
+                filterGraph = null;
             }
 
-            if (capFilter != null)
+            if (sourceOutputPin != null)
             {
-                Marshal.ReleaseComObject(capFilter);
-                capFilter = null;
+                Marshal.ReleaseComObject(sourceOutputPin);
+                sourceOutputPin = null;
             }
 
-            if (outputPin != null)
+            if (renderInputPin != null)
             {
-                Marshal.ReleaseComObject(outputPin);
-                capFilter = null;
+                Marshal.ReleaseComObject(renderInputPin);
+                renderInputPin = null;
+            }
+
+            if (source != null)
+            {
+                Marshal.ReleaseComObject(source);
+                source = null;
+            }
+
+            if (renderer != null)
+            {
+                Marshal.ReleaseComObject(renderer);
+                renderer = null;
             }
 
             disposed = true;

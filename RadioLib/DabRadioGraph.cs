@@ -5,66 +5,127 @@ using DirectShowLib.Utils;
 
 namespace RadioLib
 {
-    public class DabRadioGraph : RadioBase
+    public enum DecoderType
     {
-        private IBaseFilter audioDecoder;
+        Microsoft = 0,
+        FFDShow = 1
+    }
 
-        public DabRadioGraph()
-        {
-            CreateFilterGraph();
-        }
-
-        private void CreateFilterGraph()
-        {
-            var filterGraph = (IFilterGraph2)new FilterGraph();
-            var device = FindDeviceByName("RTKDABSourceFilter");
-            
-            capFilter = CreateFilterInstance(device);
-            var hr = filterGraph.AddFilter(capFilter, "RTKDABSourceFilter");
-            Marshal.ThrowExceptionForHR(hr);
-
-            audioDecoder = FilterGraphTools.AddFilterFromClsid(filterGraph, typeof(CMpegAudioCodec).GUID, "AudioDecoder");
-            Marshal.ThrowExceptionForHR(hr);
-
-            mediaControl = filterGraph as IMediaControl;
-        }
+    public class DabRadioGraph : RadioBase, IDisposable
+    {
+        private IBaseFilter decoder;
+        private IBaseFilter splitter;
+        private IPin decoderInputPin;
+        private IPin decoderOutputPin;
 
         public DabRadio RadioControl
         {
-            get { return new DabRadio((IDabRadioControlFilter)capFilter); }
+            get { return new DabRadio((IDabRadioControlFilter)source); }
         }
 
-        public void ConnectFilters()
+        protected override void ConnectPins()
         {
-            var filterGraph = mediaControl as IFilterGraph2;
-            if (filterGraph == null)
-                throw new NullReferenceException("FilterGraph is null");
+            FilterGraphTools.ConnectFilters(filterGraph, sourceOutputPin, decoderInputPin, true);
+            FilterGraphTools.ConnectFilters(filterGraph, decoderOutputPin, renderInputPin, true);
+        }
 
-            outputPin = GetUnconnectedPin(capFilter, PinDirection.Output);
-            if (outputPin == null)
+        protected override string SourceFilterName
+        {
+            get { return "RTKDABSourceFilter"; }
+        }
+
+        protected override void DisconnectPins()
+        {
+            var hr = filterGraph.Disconnect(sourceOutputPin);
+            Marshal.ThrowExceptionForHR(hr);
+
+            // Disconnet spliiter?
+
+            hr = filterGraph.Disconnect(decoderInputPin);
+            Marshal.ThrowExceptionForHR(hr);
+
+            hr = filterGraph.Disconnect(decoderOutputPin);
+            Marshal.ThrowExceptionForHR(hr);
+
+            hr = filterGraph.Disconnect(renderInputPin);
+            Marshal.ThrowExceptionForHR(hr);
+        }
+
+        protected override bool BuildGraph()
+        {
+            const DecoderType type = DecoderType.Microsoft;
+
+            switch (type)
+            {
+                case DecoderType.Microsoft:
+                    decoder = FilterGraphTools.AddFilterFromClsid(filterGraph, typeof(CMpegAudioCodec).GUID, "AudioDecoder");
+                    break;
+                case DecoderType.FFDShow:
+                    // Insert FFD guid here
+                    decoder = FilterGraphTools.AddFilterFromClsid(filterGraph, typeof(CMpegAudioCodec).GUID, "AudioDecoder");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            renderer = FilterGraphTools.AddFilterFromClsid(filterGraph, typeof(DSoundRender).GUID, "Renderer");
+
+            sourceOutputPin = GetUnconnectedPin(source, PinDirection.Output);
+            if (sourceOutputPin == null)
                 throw new NullReferenceException("Cannot find unconnected output pin");
 
-            var inputPin = GetUnconnectedPin(audioDecoder, PinDirection.Input);
-            if (inputPin == null)
+            decoderInputPin = GetUnconnectedPin(decoder, PinDirection.Input);
+            if (decoderInputPin == null)
                 throw new NullReferenceException("Cannot find unconnected input pin");
 
-            var audioOutputPin = GetUnconnectedPin(audioDecoder, PinDirection.Output);
-            if (audioOutputPin == null)
+            decoderOutputPin = GetUnconnectedPin(decoder, PinDirection.Output);
+            if (decoderOutputPin == null)
                 throw new NullReferenceException("Cannot find unconnected input pin");
 
-            var hr = filterGraph.Connect(outputPin, inputPin);
-            Marshal.ThrowExceptionForHR(hr);
-
-            hr = filterGraph.Render(audioOutputPin);
-            Marshal.ThrowExceptionForHR(hr);
-
-            Marshal.ReleaseComObject(audioOutputPin);
-            Marshal.ReleaseComObject(inputPin);
-            Marshal.ThrowExceptionForHR(hr);
+            renderInputPin = GetUnconnectedPin(renderer, PinDirection.Input);
+            if (renderInputPin == null)
+                throw new NullReferenceException("Cannot find unconnected input pin");
+            
+            graphBuilt = true;
+            return true;
         }
 
-        public void ReConnectFilters()
+        protected override void Dispose(bool disposing)
         {
+            if (disposed)
+                return;
+
+            if (disposing)
+            {
+                // Dispose managed resources.
+            }
+
+            if (decoderInputPin != null)
+            {
+                Marshal.ReleaseComObject(decoderInputPin);
+                decoderInputPin = null;
+            }
+
+            if (decoderOutputPin != null)
+            {
+                Marshal.ReleaseComObject(decoderOutputPin);
+                decoderOutputPin = null;
+            }
+
+            if (decoder != null)
+            {
+                Marshal.ReleaseComObject(decoder);
+                decoder = null;
+            }
+
+            if (splitter != null)
+            {
+                Marshal.ReleaseComObject(splitter);
+                splitter = null;
+            }
+
+            base.Dispose(disposing);
+            disposed = true;
         }
     }
 }

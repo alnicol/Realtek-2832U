@@ -39,7 +39,8 @@ namespace RadioExample
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            fmRadioGraph.Start();
+            controller.Frequency = controller.Frequency;
+            fmRadioGraph.Play();
         }
 
         private void stopButton_Click(object sender, EventArgs e)

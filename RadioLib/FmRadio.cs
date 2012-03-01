@@ -9,6 +9,7 @@ namespace RadioLib
 
         private readonly IFmRadioControlFilter filterInterface;
         private readonly RadioDataSystem rds; // Need to dispose of this
+        private int frequency;
 
         public FmRadio(IFmRadioControlFilter filterInterface)
         {
@@ -24,7 +25,12 @@ namespace RadioLib
 
         public int Frequency
         {
-            set { filterInterface.SetFrequency(value); }
+            get { return frequency; }
+            set
+            {
+                frequency = value;
+                filterInterface.SetFrequency(value);
+            }
         }
 
         public bool SignalLock
