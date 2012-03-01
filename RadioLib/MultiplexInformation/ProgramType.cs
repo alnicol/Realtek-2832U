@@ -3,6 +3,41 @@ using System.Runtime.InteropServices;
 
 namespace RadioLib.MultiplexInformation
 {
+    // Does not apply to North America. Would be better coming from an XML file
+    public enum BasicProgramType : byte
+    {
+        None = 0,
+        News = 1,
+        CurrentAffairs = 2,
+        Information = 3,
+        Sport = 4,
+        Education = 5,
+        Drama = 6,
+        Culture = 7,
+        Science = 8,
+        Varied = 9,
+        PopMusic = 10,
+        RockMusic = 11,
+        EasyListeningMusic = 12,
+        LightClassical = 13,
+        SeriousClassical = 14,
+        OtherMusic = 15,
+        Weather = 16,
+        FinanceBusiness = 17,
+        Childrens = 18,
+        SocialAffairs = 19,
+        Religion = 20,
+        PhoneIn = 21,
+        Travel = 22,
+        Leisure = 23,
+        JazzMusic = 24,
+        CountryMusic = 25,
+        NationalMusic = 26,
+        OldiesMusic = 27,
+        FolkMusic = 28,
+        Documentary = 29
+    }
+
     // ReSharper disable FieldCanBeMadeReadOnly.Local
     #pragma warning disable 649
 
@@ -62,9 +97,14 @@ namespace RadioLib.MultiplexInformation
             }
         }
 
-        public byte BasicProgramType
+        public BasicProgramType BasicProgramType
         {
-            get { return intCode; }
+            get
+            {
+                if (!Enum.IsDefined(typeof(BasicProgramType), intCode))
+                    return BasicProgramType.None;
+                return (BasicProgramType)intCode;
+            }
         }
 
         public byte ComplementaryProgramType
