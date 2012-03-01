@@ -16,7 +16,7 @@ namespace RadioLib
 
         public char Type
         {
-            get { return (char) ('A' - 1 + latestData.Type0A_0B); }
+            get { return (char) ('A' - 1 + latestData.Type); }
         }
 
         public string ProgrammeService
@@ -62,12 +62,12 @@ namespace RadioLib
 
         public string AlternateFrequency1
         {
-            get { return Convert.ToString(latestData.afreq); }
+            get { return Convert.ToString(latestData.alternateFrequencyOne); }
         }
 
         public string AlternateFrequency2
         {
-            get { return Convert.ToString(latestData.afreq2); }
+            get { return Convert.ToString(latestData.alternateFrequencyTwo); }
         }
 
         public void Update()
@@ -87,19 +87,21 @@ namespace RadioLib
             get { return nativeMemoryBuffer; }
         }
 
+#pragma warning disable 649
         [StructLayout(LayoutKind.Sequential)]
         private class RdsDataStruct
         {
-            public byte Type0A_0B;
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] PSName = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B3Name = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B2Name = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B1Name = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B0Name = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] MsName = new byte[25];
-            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)] public readonly byte[] TATPName = new byte[40];
-            public float afreq;
-            public float afreq2;
+            public byte Type;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] PSName;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B3Name;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B2Name;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B1Name;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] B0Name;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 25)] public readonly byte[] MsName;
+            [MarshalAs(UnmanagedType.ByValArray, SizeConst = 40)] public readonly byte[] TATPName;
+            public float alternateFrequencyOne;
+            public float alternateFrequencyTwo;
         }
+#pragma warning restore 649
     }
 }

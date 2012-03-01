@@ -7,7 +7,7 @@ namespace RadioLib
 {
     public class DabRadio
     {
-        private IDabRadioControlFilter filterInterface;
+        private readonly IDabRadioControlFilter filterInterface;
 
         public DabRadio(IDabRadioControlFilter filterInterface)
         {
@@ -25,7 +25,7 @@ namespace RadioLib
             }
             set 
             { 
-                var result = filterInterface.SetFrequencyAndBandwidth(value.Frequency, value.Bandwidth);
+                filterInterface.SetFrequencyAndBandwidth(value.Frequency, value.Bandwidth);
             }
         }
 
@@ -51,12 +51,12 @@ namespace RadioLib
 
         public short FicCounter
         {
-            set { var result = filterInterface.SetFICParseCnt(ref value); }
+            set { filterInterface.SetFicParseCounter(ref value); }
         }
 
         public short FicTimeout
         {
-            set { var result = filterInterface.SetFICParseTOut(ref value); }
+            set { filterInterface.SetFicParseTimeout(ref value); }
         }
 
         public FmResult QueryConnect()
@@ -66,15 +66,15 @@ namespace RadioLib
 
         public void Add(ServiceDetails service)
         {
-            //filterInterface.AddSC((char)0, (char)5, 0, (char)0, (char)35, (char)0, 0, 0, (char)0);
-            filterInterface.AddSC(service.Mode, service.SubChannelId, service.FirstCapacityUnit, service.EqualErrorProtection,
+            //filterInterface.AddService((char)0, (char)5, 0, (char)0, (char)35, (char)0, 0, 0, (char)0);
+            filterInterface.AddService(service.Mode, service.SubChannelId, service.FirstCapacityUnit, service.EqualErrorProtection,
                                   service.UepIndex, service.EepIndex, service.NumberCapacityUnits, service.PacketAddr,
                                   service.FecScheme);
         }
 
         public void Delete(ServiceDetails service)
         {
-            filterInterface.DelSC(service.Mode, service.SubChannelId, service.PacketAddr);
+            filterInterface.DeleteService(service.Mode, service.SubChannelId, service.PacketAddr);
         }
 
         public void StartFicParse()
@@ -90,12 +90,12 @@ namespace RadioLib
                 if (counter == 30)
                     throw new Exception();
             }
-            var result = filterInterface.StartFICParse();
+            filterInterface.StartFicParse();
         }
 
         public void StopFicParse()
         {
-            filterInterface.StopFICParse();
+            filterInterface.StopFicParse();
         }
 
         public List<ServiceDetails> GetMultiplexInformation()
@@ -103,7 +103,7 @@ namespace RadioLib
             IntPtr data;
             while (true)
             {
-                var result = filterInterface.GetMCI(out data);
+                var result = filterInterface.GetMultiplexInformation(out data);
                 if ((int)result == 2)
                     Thread.Sleep(50);
                 else
@@ -111,7 +111,7 @@ namespace RadioLib
             }
 
             var ensemble = (Ensemble) Marshal.PtrToStructure(data, typeof (Ensemble));
-            var date = ensemble.DateTime.Time;
+            //var date = ensemble.DateTime.Time;
             var serviceDetails = new List<ServiceDetails>();
             foreach (var service in ensemble.Services)
             {
@@ -119,11 +119,13 @@ namespace RadioLib
                 {
                     if (audioNode.ServiceType == AudioType.AacAudio)
                         continue;
-                    var serviceDetail = new ServiceDetails(service.Label);
-                    serviceDetail.Mode = (char) 0;
-                    serviceDetail.SubChannelId = (char) audioNode.SubchannelId;
-                    serviceDetail.FirstCapacityUnit = (short) audioNode.FirstCapacityUnit;
-                    serviceDetail.EqualErrorProtection = audioNode.EepEnabled ? (char)1 : (char)0;
+                    var serviceDetail = new ServiceDetails(service.Label)
+                                            {
+                                                Mode = (char) 0,
+                                                SubChannelId = (char) audioNode.SubchannelId,
+                                                FirstCapacityUnit = (short) audioNode.FirstCapacityUnit,
+                                                EqualErrorProtection = audioNode.EepEnabled ? (char) 1 : (char) 0
+                                            };
                     if (serviceDetail.EqualErrorProtection == 1)
                     {
                         serviceDetail.EepIndex = (char) audioNode.EepIndex;

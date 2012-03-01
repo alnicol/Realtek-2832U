@@ -52,7 +52,7 @@ namespace RadioLib
 
                 PinInfo info;
                 destPin.QueryPinInfo(out info);
-                var name = info.name;
+                //var name = info.name;
                 destPin.ConnectedTo(out pPin);
 
                 if (pPin == null && pinDir == direction)

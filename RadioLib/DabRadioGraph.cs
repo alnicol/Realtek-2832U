@@ -37,6 +37,8 @@ namespace RadioLib
         public void ConnectFilters()
         {
             var filterGraph = mediaControl as IFilterGraph2;
+            if (filterGraph == null)
+                throw new NullReferenceException("FilterGraph is null");
 
             outputPin = GetUnconnectedPin(capFilter, PinDirection.Output);
             if (outputPin == null)
@@ -51,6 +53,7 @@ namespace RadioLib
                 throw new NullReferenceException("Cannot find unconnected input pin");
 
             var hr = filterGraph.Connect(outputPin, inputPin);
+            Marshal.ThrowExceptionForHR(hr);
 
             hr = filterGraph.Render(audioOutputPin);
             Marshal.ThrowExceptionForHR(hr);
