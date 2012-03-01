@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
+using RadioLib.MultiplexInformation;
 
 namespace RadioLib
 {
@@ -123,17 +124,17 @@ namespace RadioLib
                                             {
                                                 Mode = (char) 0,
                                                 SubChannelId = (char) audioNode.SubchannelId,
-                                                FirstCapacityUnit = (short) audioNode.FirstCapacityUnit,
-                                                EqualErrorProtection = audioNode.EepEnabled ? (char) 1 : (char) 0
+                                                FirstCapacityUnit = (short) audioNode.StartCapacityUnit,
+                                                EqualErrorProtection = audioNode.EqualErrorProtection ? (char) 1 : (char) 0
                                             };
                     if (serviceDetail.EqualErrorProtection == 1)
                     {
-                        serviceDetail.EepIndex = (char) audioNode.EepIndex;
-                        serviceDetail.NumberCapacityUnits = (short) audioNode.CapacityUnits;
+                        serviceDetail.EepIndex = (char) audioNode.ErrorProtectionIndex;
+                        serviceDetail.NumberCapacityUnits = (short) audioNode.CapacityUnitCount;
                     }
                     else
                     {
-                        serviceDetail.UepIndex = (char)audioNode.UepIndex;
+                        serviceDetail.UepIndex = (char)audioNode.ErrorProtectionIndex;
                     }
 
                     serviceDetails.Add(serviceDetail);

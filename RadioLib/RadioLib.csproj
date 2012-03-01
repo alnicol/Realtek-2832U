@@ -32,6 +32,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
@@ -40,7 +41,24 @@
     <Compile Include="FilterGraphTools.cs" />
     <Compile Include="IDabRadioControlFilter.cs" />
     <Compile Include="IFmRadioControlFilter.cs" />
-    <Compile Include="MultiplexInformation.cs" />
+    <Compile Include="MultiplexInformation\AnnouncementSupport.cs" />
+    <Compile Include="MultiplexInformation\AnnouncementSwitch.cs" />
+    <Compile Include="MultiplexInformation\Ensemble.cs" />
+    <Compile Include="MultiplexInformation\ExtendedDateTime.cs" />
+    <Compile Include="MultiplexInformation\ExtendedField.cs" />
+    <Compile Include="MultiplexInformation\Language.cs" />
+    <Compile Include="MultiplexInformation\BaseData.cs" />
+    <Compile Include="MultiplexInformation\Nodes\AudioStreamNode.cs" />
+    <Compile Include="MultiplexInformation\Nodes\BaseNode.cs" />
+    <Compile Include="MultiplexInformation\Nodes\DataStreamNode.cs" />
+    <Compile Include="MultiplexInformation\Nodes\FIdcStreamNode.cs" />
+    <Compile Include="MultiplexInformation\Nodes\PacketStreamNode.cs" />
+    <Compile Include="MultiplexInformation\ProgramIdentifier.cs" />
+    <Compile Include="MultiplexInformation\ProgramType.cs" />
+    <Compile Include="MultiplexInformation\Service.cs" />
+    <Compile Include="MultiplexInformation\ServiceTypes.cs" />
+    <Compile Include="MultiplexInformation\TimeOffset.cs" />
+    <Compile Include="MultiplexInformation\UserApplication.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="FmRadioGraph.cs" />
     <Compile Include="RadioBase.cs" />
@@ -54,6 +72,7 @@
       <Name>DirectShowLib-2008</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
