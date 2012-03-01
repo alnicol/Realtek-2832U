@@ -67,7 +67,6 @@ namespace RadioLib
 
         public void Add(ServiceDetails service)
         {
-            //filterInterface.AddService((char)0, (char)5, 0, (char)0, (char)35, (char)0, 0, 0, (char)0);
             filterInterface.AddService(service.Mode, service.SubChannelId, service.FirstCapacityUnit, service.EqualErrorProtection,
                                   service.UepIndex, service.EepIndex, service.NumberCapacityUnits, service.PacketAddr,
                                   service.FecScheme);
