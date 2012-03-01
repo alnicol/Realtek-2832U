@@ -46,10 +46,9 @@
     <Compile Include="MultiplexInformation\Ensemble.cs" />
     <Compile Include="MultiplexInformation\ExtendedDateTime.cs" />
     <Compile Include="MultiplexInformation\ExtendedField.cs" />
+    <Compile Include="MultiplexInformation\Helpers.cs" />
     <Compile Include="MultiplexInformation\Language.cs" />
-    <Compile Include="MultiplexInformation\BaseData.cs" />
     <Compile Include="MultiplexInformation\Nodes\AudioStreamNode.cs" />
-    <Compile Include="MultiplexInformation\Nodes\BaseNode.cs" />
     <Compile Include="MultiplexInformation\Nodes\DataStreamNode.cs" />
     <Compile Include="MultiplexInformation\Nodes\FIdcStreamNode.cs" />
     <Compile Include="MultiplexInformation\Nodes\PacketStreamNode.cs" />

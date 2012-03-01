@@ -6,8 +6,10 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class AnnouncementSwitch : BaseData
+    public struct AnnouncementSwitch
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         byte clusterId;
         ushort aswFlags;
         [MarshalAs(UnmanagedType.U1)]
@@ -15,6 +17,11 @@ namespace RadioLib.MultiplexInformation
         byte regionFlag;
         byte subchannelId;
         byte regionIdLow;
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public byte ClusterId
         {

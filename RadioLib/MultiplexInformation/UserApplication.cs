@@ -7,7 +7,7 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class UserApplication
+    public struct UserApplication
     {
         ushort userAppType;
         byte userAppDataLength;

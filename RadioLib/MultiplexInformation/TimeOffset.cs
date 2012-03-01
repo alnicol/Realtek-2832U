@@ -7,8 +7,10 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class TimeOffset : BaseData
+    public struct TimeOffset
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         [MarshalAs(UnmanagedType.U1)]
         bool isProgram;
         [MarshalAs(UnmanagedType.U1)]
@@ -20,6 +22,11 @@ namespace RadioLib.MultiplexInformation
         byte internationalTableId;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         private ExtendedField[] extendedField;
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public byte InternationalTableId
         {
@@ -46,13 +53,16 @@ namespace RadioLib.MultiplexInformation
             get { return localTimeUnique; }
         }
 
-        public IEnumerable<ExtendedField> ExtendedFields()
+        public IEnumerable<ExtendedField> ExtendedFields
         {
-            if (!extendedFieldPresent)
-                yield break;
+            get
+            {
+                if (!extendedFieldPresent)
+                    yield break;
 
-            for (var i = 0; i < 6; i++)
-                yield return extendedField[i];
+                for (var i = 0; i < 6; i++)
+                    yield return extendedField[i];
+            }
         }
     }
 

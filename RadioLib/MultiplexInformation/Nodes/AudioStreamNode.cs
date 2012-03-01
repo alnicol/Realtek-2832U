@@ -8,8 +8,16 @@ namespace RadioLib.MultiplexInformation.Nodes
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public class AudioStreamNode : BaseNode
+    public struct AudioStreamNode
     {
+        IntPtr nextNode;
+        [MarshalAs(UnmanagedType.U1)]
+        bool isLabelValid;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+        char[] label;
+        byte language;
+        ushort abbreviatedLabelFlag;
+        byte characterSet;
         byte serviceComponentId;
         byte serviceType;
         byte subchannelId;
@@ -30,7 +38,44 @@ namespace RadioLib.MultiplexInformation.Nodes
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 6)]
         UserApplication[] userApplications;
 
-        public override byte SubchannelId
+        public byte Language
+        {
+            get { return language; }
+        }
+
+        public byte CharacterSet
+        {
+            get { return characterSet; }
+        }
+
+        public string ShortLabel
+        {
+            get
+            {
+                if (!isLabelValid)
+                    return string.Empty;
+
+                return Helpers.GetAbbreviatedLabel(Label, abbreviatedLabelFlag);
+            }
+        }
+
+        public override string ToString()
+        {
+            return Label;
+        }
+
+        public string Label
+        {
+            get
+            {
+                if (!isLabelValid)
+                    return string.Empty;
+
+                return new string(label).Trim();
+            }
+        }
+
+        public byte SubchannelId
         {
             get { return subchannelId; }
         }
@@ -55,27 +100,27 @@ namespace RadioLib.MultiplexInformation.Nodes
             }
         }
 
-        public override byte ServiceComponentId
+        public byte ServiceComponentId
         {
             get { return serviceComponentId; }
         }
 
-        public override bool ConditionalAccess
+        public bool ConditionalAccess
         {
             get { return usesAccessControl; }
         }
 
-        public override byte ConditionalAccessId
+        public byte ConditionalAccessId
         {
             get { return conditionalAccessId; }
         }
 
-        public override bool IsLocal
+        public bool IsLocal
         {
             get { return localFlag; }
         }
 
-        public override bool IsPrimary
+        public bool IsPrimary
         {
             get { return isPrimary; }
         }
@@ -95,17 +140,15 @@ namespace RadioLib.MultiplexInformation.Nodes
             }
         }
 
-        public override BaseNode GetNext()
-        {
-            if (nextNode != IntPtr.Zero)
-                return (AudioStreamNode)Marshal.PtrToStructure(nextNode, typeof(AudioStreamNode));
-            return null;
-        }
-
-        public override IEnumerable<UserApplication> UserApplications()
+        public IEnumerable<UserApplication> UserApplications()
         {
             for (var i = 0; i < userApplicationCount; i++)
                 yield return userApplications[i];
+        }
+
+        public IntPtr Next
+        {
+            get { return nextNode; }
         }
     }
 

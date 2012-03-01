@@ -29,8 +29,10 @@ namespace RadioLib.MultiplexInformation
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    public class AnnouncementSupport : BaseData
+    public struct AnnouncementSupport
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         ushort serviceId;
         ushort announcementType;
         byte clusterIdCount;
@@ -41,6 +43,11 @@ namespace RadioLib.MultiplexInformation
         byte[] data;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 23)]
         AnnouncementSwitch[] announcementSwitch;
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public ushort ServiceId
         {

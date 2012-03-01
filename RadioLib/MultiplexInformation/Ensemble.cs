@@ -10,7 +10,7 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public class Ensemble
+    public struct Ensemble
     {
         ushort id;
         [MarshalAs(UnmanagedType.U1)]
@@ -54,21 +54,14 @@ namespace RadioLib.MultiplexInformation
             }
         }
 
-        public string AbbreviatedLabel
+        public string ShortLabel
         {
             get
             {
                 if (!isLabelValid)
                     return string.Empty;
 
-                var bits = new BitArray(BitConverter.GetBytes(abbreviatedLabelFlag));
-                var builder = new StringBuilder();
-                for (var i = bits.Length - 1; i >= 0; i--)
-                {
-                    if (bits[i])
-                        builder.Append(label[bits.Length - i]);
-                }
-                return builder.ToString().Trim();
+                return Helpers.GetAbbreviatedLabel(Label, abbreviatedLabelFlag);
             }
         }
 
@@ -84,6 +77,11 @@ namespace RadioLib.MultiplexInformation
                     yield return serviceHeader;
                 }
             }
+        }
+
+        public static Ensemble FromIntPtr(IntPtr data)
+        {
+            return (Ensemble)Marshal.PtrToStructure(data, typeof(Ensemble));
         }
     }
 

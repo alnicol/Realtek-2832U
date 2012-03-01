@@ -6,12 +6,19 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class ExtendedField : BaseData
+    public struct ExtendedField
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         byte serviceNumber;
         byte localTimeOffset;
         byte ensembleCountryCode;
         int serviceId;
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public int ServiceId
         {

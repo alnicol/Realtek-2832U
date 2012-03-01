@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using System.Threading;
 using RadioLib.MultiplexInformation;
+using RadioLib.MultiplexInformation.Nodes;
 
 namespace RadioLib
 {
@@ -111,8 +112,9 @@ namespace RadioLib
                     break;
             }
 
-            var ensemble = (Ensemble) Marshal.PtrToStructure(data, typeof (Ensemble));
-            //var date = ensemble.DateTime.Time;
+            var ensemble = Ensemble.FromIntPtr(data);
+            var abbreviatedLabel = ensemble.ShortLabel;
+            var date = ensemble.DateTime.Time;
             var serviceDetails = new List<ServiceDetails>();
             foreach (var service in ensemble.Services)
             {
@@ -120,24 +122,7 @@ namespace RadioLib
                 {
                     if (audioNode.ServiceType == AudioType.AacAudio)
                         continue;
-                    var serviceDetail = new ServiceDetails(service.Label)
-                                            {
-                                                Mode = (char) 0,
-                                                SubChannelId = (char) audioNode.SubchannelId,
-                                                FirstCapacityUnit = (short) audioNode.StartCapacityUnit,
-                                                EqualErrorProtection = audioNode.EqualErrorProtection ? (char) 1 : (char) 0
-                                            };
-                    if (serviceDetail.EqualErrorProtection == 1)
-                    {
-                        serviceDetail.EepIndex = (char) audioNode.ErrorProtectionIndex;
-                        serviceDetail.NumberCapacityUnits = (short) audioNode.CapacityUnitCount;
-                    }
-                    else
-                    {
-                        serviceDetail.UepIndex = (char)audioNode.ErrorProtectionIndex;
-                    }
-
-                    serviceDetails.Add(serviceDetail);
+                    serviceDetails.Add(new ServiceDetails(service.Label, audioNode));
                 }
             }
             return serviceDetails;
@@ -162,9 +147,22 @@ namespace RadioLib
             return Name;
         }
 
-        public ServiceDetails(string name)
+        public ServiceDetails(string name, AudioStreamNode audioNode)
         {
             Name = name;
+            Mode = (char) audioNode.ServiceType;
+            SubChannelId = (char) audioNode.SubchannelId;
+            FirstCapacityUnit = (short) audioNode.StartCapacityUnit;
+            EqualErrorProtection = audioNode.EqualErrorProtection ? (char) 1 : (char) 0;
+            if (EqualErrorProtection == 1)
+            {
+                EepIndex = (char) audioNode.ErrorProtectionIndex;
+                NumberCapacityUnits = (short) audioNode.CapacityUnitCount;
+            }
+            else
+            {
+                UepIndex = (char)audioNode.ErrorProtectionIndex;
+            }
         }
     }
 }

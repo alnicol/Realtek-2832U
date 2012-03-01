@@ -7,8 +7,10 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class ExtendedDateTime : BaseData
+    public struct ExtendedDateTime
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         int modifiedJulianDate;
         [MarshalAs(UnmanagedType.U1)]
         bool currentDateHasLeapSecond;
@@ -20,6 +22,11 @@ namespace RadioLib.MultiplexInformation
         byte minutes;
         byte seconds;
         int milliseconds;
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public bool DayHasLeapSecond
         {

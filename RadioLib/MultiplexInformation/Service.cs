@@ -9,7 +9,7 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
-    public class Service
+    public struct Service
     {
         [MarshalAs(UnmanagedType.U1)]
         bool isData;
@@ -30,6 +30,11 @@ namespace RadioLib.MultiplexInformation
         public IntPtr NextFIDCNode;
         public IntPtr NextSCNode;
 
+        public override string ToString()
+        {
+            return Label;
+        }
+
         public bool IsData
         {
             get { return isData; }
@@ -45,9 +50,15 @@ namespace RadioLib.MultiplexInformation
             get { return serviceComponentCount; }
         }
 
-        public ushort CharFlag
+        public string ShortLabel
         {
-            get { return abbreviatedLabelFlag; }
+            get
+            {
+                if (!isLabelValid)
+                    return string.Empty;
+
+                return Helpers.GetAbbreviatedLabel(Label, abbreviatedLabelFlag);
+            }
         }
 
         public byte Charset
@@ -89,11 +100,12 @@ namespace RadioLib.MultiplexInformation
                     yield break;
 
                 var component = (PacketStreamNode)Marshal.PtrToStructure(NextSCNode, typeof(PacketStreamNode));
-                while (component != null)
+                while (component.Next != IntPtr.Zero)
                 {
                     yield return component;
-                    component = (PacketStreamNode) component.GetNext();
+                    component = (PacketStreamNode)Marshal.PtrToStructure(NextSCNode, typeof(PacketStreamNode));
                 }
+                yield return component;
             }
         }
 
@@ -105,11 +117,12 @@ namespace RadioLib.MultiplexInformation
                     yield break;
 
                 var component = (FIdcStreamNode)Marshal.PtrToStructure(NextFIDCNode, typeof(FIdcStreamNode));
-                while (component != null)
+                while (component.Next != IntPtr.Zero)
                 {
                     yield return component;
-                    component = (FIdcStreamNode)component.GetNext();
+                    component = (FIdcStreamNode)Marshal.PtrToStructure(NextFIDCNode, typeof(FIdcStreamNode));
                 }
+                yield return component;
             }
         }
 
@@ -121,11 +134,12 @@ namespace RadioLib.MultiplexInformation
                     yield break;
 
                 var component = (AudioStreamNode)Marshal.PtrToStructure(NextAudioStreamNode, typeof(AudioStreamNode));
-                while (component != null)
+                while (component.Next != IntPtr.Zero)
                 {
                     yield return component;
-                    component = (AudioStreamNode)component.GetNext();
+                    component = (AudioStreamNode)Marshal.PtrToStructure(NextAudioStreamNode, typeof(AudioStreamNode));
                 }
+                yield return component;
             }
         }
 
@@ -137,11 +151,12 @@ namespace RadioLib.MultiplexInformation
                     yield break;
 
                 var component = (DataStreamNode)Marshal.PtrToStructure(NextDataStreamNode, typeof(DataStreamNode));
-                while (component != null)
+                while (component.Next != IntPtr.Zero)
                 {
                     yield return component;
-                    component = (DataStreamNode)component.GetNext();
+                    component = (DataStreamNode)Marshal.PtrToStructure(NextDataStreamNode, typeof(DataStreamNode));
                 }
+                yield return component;
             }
         }
     }

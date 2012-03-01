@@ -7,8 +7,10 @@ namespace RadioLib.MultiplexInformation
     #pragma warning disable 649
 
     [StructLayout(LayoutKind.Sequential)]
-    public class ProgramType : BaseData
+    public struct ProgramType
     {
+        [MarshalAs(UnmanagedType.U1)]
+        bool isValid;
         ushort serviceId;
         [MarshalAs(UnmanagedType.U1)]
         bool isStaticContent;
@@ -24,6 +26,11 @@ namespace RadioLib.MultiplexInformation
         byte type0Header;
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 28)]
         byte[] data; // no type0 header
+
+        public bool IsValid
+        {
+            get { return isValid; }
+        }
 
         public ushort ServiceId
         {
