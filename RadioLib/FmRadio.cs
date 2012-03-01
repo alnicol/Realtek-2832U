@@ -49,7 +49,7 @@ namespace RadioLib
 
         public Deemphasis Deemphasis
         {
-            set { filterInterface.SetAudioSampleRate(value == Deemphasis.Low ? (uint) 50 : 75); }
+            set { filterInterface.SetDeemphasisTc(value == Deemphasis.Low ? (byte)50 : (byte)75); }
         }
 
         public QualityControl QualityControl
