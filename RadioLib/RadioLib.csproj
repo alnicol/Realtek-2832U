@@ -41,6 +41,7 @@
     <Compile Include="FilterGraphTools.cs" />
     <Compile Include="IDabRadioControlFilter.cs" />
     <Compile Include="IFmRadioControlFilter.cs" />
+    <Compile Include="ISplitterInterface.cs" />
     <Compile Include="MultiplexInformation\AnnouncementSupport.cs" />
     <Compile Include="MultiplexInformation\AnnouncementSwitch.cs" />
     <Compile Include="MultiplexInformation\Ensemble.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="RadioData.cs" />
     <Compile Include="RadioDataSystem.cs" />
     <Compile Include="FmRadio.cs" />
+    <Compile Include="Splitter.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DirectShowLib\DirectShowLib-2008.csproj">
